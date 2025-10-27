@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// custom icons
+// Custom icons
 const userIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149060.png",
   iconSize: [35, 35],
@@ -16,7 +16,19 @@ const centerIcon = new L.Icon({
   iconAnchor: [17, 34],
 });
 
-// component to move map when user location changes
+const activeCenterIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/2776/2776067.png", // Green icon
+  iconSize: [35, 35],
+  iconAnchor: [17, 34],
+});
+
+const inactiveCenterIcon = new L.Icon({
+  iconUrl: "https://cdn-icons-png.flaticon.com/512/753/753345.png", // Gray icon
+  iconSize: [35, 35],
+  iconAnchor: [17, 34],
+});
+
+// Component to move map when user location changes
 function LocationMarker({ position }) {
   const map = useMap();
   useEffect(() => {
@@ -24,98 +36,189 @@ function LocationMarker({ position }) {
       map.flyTo(position, 13);
     }
   }, [position, map]);
+  
   return position ? (
     <Marker position={position} icon={userIcon}>
-      <Popup>You are here 👋</Popup>
+      <Popup>
+        <div className="text-center">
+          <b>📍 You are here</b>
+          <br />
+          <small>Current Location</small>
+        </div>
+      </Popup>
     </Marker>
   ) : null;
 }
 
-export default function MapComp() {
+export default function MapComp({ centers = [] }) {
   const [userPosition, setUserPosition] = useState(null);
   const [centerLocations, setCenterLocations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Example data with addresses only
-  const centers = [
-    { id: 1, name: "BinWise Cairo Center", address: "Nasr City, Cairo, Egypt" },
-    { id: 2, name: "BinWise Giza Center", address: "Dokki, Giza, Egypt" },
-    { id: 3, name: "BinWise Alex Center", address: "محمد نجيب, Alexandria, Egypt" },
-    { id: 4, name: "BinWise Alex Center", address:"El Galaa Street, Victoria, Alexandria, Egypt"
-},
-    { id: 5, name: "BinWise Alex Center", address: "Sidi bishr, Alexandria, Egypt" },
-    { id: 6, name: "BinWise Alex Center", address: "محطة سيدي بشر, Alexandria, Egypt" },
-    { id: 7, name: "BinWise Alex Center", address: "  شارع السياحة الاحمدية فيكتوريا,Alexandria, Egypt" },
-    { id: 8, name: "BinWise Alex Center", address: " Azzbet Saad ,Alexandria, Egypt" },
-    { id: 9, name: "BinWise Alex Center", address: "Sidi Gaber, Alexandria, Egypt" },
-    { id: 10, name: "BinWise Alex Center", address: " ميدان عزبة سعد,  Alexandria, Egypt" },
-  ];
-
-  // convert address to coordinates
+  // Convert address to coordinates using Nominatim API
   async function fetchCoordinates(address) {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`
-    );
-    const data = await res.json();
-    if (data && data.length > 0) {
-      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`
+      );
+      const data = await res.json();
+      if (data && data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+      }
+      return null;
+    } catch (error) {
+      console.error("Error geocoding address:", address, error);
+      return null;
     }
-    return null;
   }
 
-  // get user's location
+  // Get user's location
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setUserPosition([pos.coords.latitude, pos.coords.longitude]);
+          const userCoords = [pos.coords.latitude, pos.coords.longitude];
+          setUserPosition(userCoords);
         },
-        (err) => console.error(err),
-        { enableHighAccuracy: true }
+        (err) => {
+          console.warn("⚠️ Could not get user location:", err.message);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
       );
     }
   }, []);
 
-  // fetch coordinates for all centers
+  // Fetch coordinates for all centers from backend
   useEffect(() => {
     async function loadCenters() {
-      const results = [];
-      for (const center of centers) {
-        const coords = await fetchCoordinates(center.address);
-        if (coords) {
-          results.push({ ...center, coords });
-        }
+      if (centers.length === 0) {
+        setCenterLocations([]);
+        setLoading(false);
+        return;
       }
+
+      setLoading(true);
+      const results = [];
+      
+      for (const center of centers) {
+        // Check if center already has coordinates
+        if (center.coordinates?.lat && center.coordinates?.lng) {
+          results.push({
+            ...center,
+            coords: [center.coordinates.lat, center.coordinates.lng],
+          });
+        } else {
+          // Geocode the location/address
+          const coords = await fetchCoordinates(center.location || center.address);
+          if (coords) {
+            results.push({ ...center, coords });
+          } else {
+            console.warn(`❌ Could not geocode center: ${center.name}`);
+          }
+        }
+        
+        // Add small delay to respect Nominatim rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+    
       setCenterLocations(results);
+      setLoading(false);
     }
+    
     loadCenters();
-  }, []);
+  }, [centers]);
+
+  // Get icon based on center status
+  const getCenterIcon = (status) => {
+    switch (status) {
+      case "active":
+        return activeCenterIcon;
+      case "inactive":
+        return inactiveCenterIcon;
+      default:
+        return centerIcon;
+    }
+  };
+
+  // Get status badge color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "inactive":
+        return "bg-gray-100 text-gray-800";
+      case "maintenance":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const defaultCenter = userPosition || [31.2001, 29.9187]; // Alexandria as default
 
   return (
-    <div className="w-full h-[500px]">
+    <div className="w-full h-[500px] relative">
+      {loading && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
+          <p className="text-sm text-gray-600">Loading centers on map...</p>
+        </div>
+      )}
+      
       <MapContainer
-        center={userPosition || [30.0444, 31.2357]} // Cairo as default
-        zoom={7}
-        style={{ height: "100%", width: "100%" }}
+        center={defaultCenter}
+        zoom={userPosition ? 13 : 10}
+        style={{ height: "100%", width: "100%", borderRadius: "1rem" }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="© OpenStreetMap contributors"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
 
-        {/* User location */}
+        {/* User location marker */}
         <LocationMarker position={userPosition} />
 
         {/* Center markers */}
         {centerLocations.map((center) => (
           <Marker
-            key={center.id}
+            key={center._id}
             position={center.coords}
-            icon={centerIcon}
+            icon={getCenterIcon(center.status)}
           >
-            <Popup>
-              <b>{center.name}</b>
-              <br />
-              {center.address}
+            <Popup maxWidth={300}>
+              <div className="p-2">
+                <h3 className="font-bold text-lg mb-1">{center.name}</h3>
+                
+                <div className={`inline-block px-2 py-1 rounded text-xs font-medium mb-2 ${getStatusColor(center.status)}`}>
+                  {center.status?.toUpperCase()}
+                </div>
+                
+                <div className="space-y-1 text-sm">
+                  <p className="text-gray-600">
+                    📍 {center.location || center.address}
+                  </p>
+                  
+                  {center.contact && (
+                    <p className="text-gray-600">
+                      📞 {center.contact}
+                    </p>
+                  )}
+                  
+                  {center.operatingHours && (
+                    <p className="text-gray-600">
+                      🕒 {center.operatingHours}
+                    </p>
+                  )}
+                  
+                  {center.acceptedMaterials && center.acceptedMaterials.length > 0 && (
+                    <p className="text-gray-600">
+                      ♻️ {center.acceptedMaterials.join(", ")}
+                    </p>
+                  )}
+                  
+              
+                </div>
+              </div>
             </Popup>
           </Marker>
         ))}

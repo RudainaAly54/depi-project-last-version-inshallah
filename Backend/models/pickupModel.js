@@ -24,12 +24,27 @@ const pickupSchema = new mongoose.Schema(
     pickupTime: {
       type: Date,
     },
-    items: [
+    items: 
       {
-        name: String,
-        quantity: Number,
+      type: [String],
+      required: true,
       },
-    ],
+    weight: {
+      type: Number,
+      required: true,
+    },
+    address: {
+      type: String,  
+      required: true,
+    },
+    instructions: {
+      type: String,
+      default: "",
+    },
+    time_slot: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

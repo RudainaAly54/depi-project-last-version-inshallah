@@ -3,29 +3,24 @@ import ReqHistoryCard from "../components/ReqHistoryCard";
 import { Truck} from 'lucide-react';
 import api from "../api/axios";
 import { AppContent } from "../context/AppContext";
+import LoadingSpinner from "../components/LoadingSpinner";
+
 
 const initState = {
-  user_id: "temp_user_id",
-  center_id: null,
   address: "",
   material: [],
   weight: null,
   pickup_status: "pending",
   instructions: "",
-  scheduled_date: null,
+  scheduled_date: null, 
   time_slot: null,
   created_at: new Date().toLocaleDateString("en-EG", {
     timeZone: "Africa/Cairo",
   }),
-  completed_at: null,
 };
 
 const reducers = (state, action) => {
   switch (action.type) {
-    case "SET_USER_ID":
-      return { ...state, user_id: action.payload };
-    case "SET_CENTER_ID":
-      return { ...state, center_id: action.payload };
     case "SET_DATE":
       return { ...state, scheduled_date: action.payload };
     case "SET_TIME":
@@ -47,8 +42,6 @@ const reducers = (state, action) => {
       return{...state, weight: action.payload};
     case "SET_INSTRUCTIONS":
       return{...state, instructions: action.payload};
-    case "SET_STATUS":
-      return{...state, pickup_status: action.payload};
     case "RESET_FORM":
       return {
         ...initState,
@@ -67,83 +60,47 @@ const PickupPage = () => {
   const [submited, setSubmited] = useState(false);
   const [pickupHistory, setPickupHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [centers, setCenters] = useState([]);
+  const [success, setSuccess] = useState(false);
+  const [editingPickupId, setEditingPickupId] = useState(null);
 
-  // Function to fetch available centers
-  const fetchCenters = async () => {
-    try {
-      const response = await api.get("/centers");
-      if (response.data.success) {
-        setCenters(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching centers:", error);
-      setCenters([]);
-    }
-  };
 
-  // Function to fetch user-specific pickup requests
-  const fetchUserPickups = async () => {
-    if (!userData?._id) {
-      console.log("No user ID available");
+//Function to fetch pickups for current user
+const fetchMyPickups = async () => {
+   console.log("1. isLoggedin:", isLoggedin);
+  console.log("2. userData:", userData);
+  console.log("3. userId:", userData?.id);
+  console.log("4. loadingUser:", loadingUser);
+    if(!isLoggedin || !userData?.id) {
+      setPickupHistory([]);
+      setLoading(false);
       return;
     }
-
-    setLoading(true);
-    try {
-      const response = await api.get(`/pickups/user/${userData._id}`);
-      
-      if (response.data.success) {
-        setPickupHistory(response.data.data);
-        console.log("User pickups fetched:", response.data.data);
-      } else {
-        console.log("No pickups found for user");
-        setPickupHistory([]);
-      }
-    } catch (error) {
-      console.error("Error fetching user pickup history:", error);
-      setPickupHistory([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Function to fetch all pickups (fallback for testing)
-  const fetchAllPickups = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get("/pickups");
-      
-      if (response.data.success) {
-        setPickupHistory(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching pickup history:", error);
-      setPickupHistory([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setLoading(true);
+        try {
+          const res = await api.get("/pickups/my");
+          if(res.data.success){
+            const lastThreePickups = res.data.pickups.slice(0, 3);
+            setPickupHistory(lastThreePickups);
+            console.log("Fetched user pickups:", res.data.pickups);
+          }else{
+            console.error("Failed to fetch user pickups:", res.data.message);
+            setPickupHistory([]);
+          }
+        } catch (error) {
+          console.error("Error fetching user pickups:", error);
+          setPickupHistory([]);
+        } finally {
+          setLoading(false);
+        }
+}
 
   // Function to add a new pickup request
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmited(true);
     
-    // Debug authentication state
-    console.log("Authentication Debug:", {
-      isLoggedin,
-      userData,
-      userId: userData?._id,
-      loadingUser
-    });
-    
-    // Use actual user ID or fallback for testing
-    const actualUserId = userData?._id || "temp_user_id_for_testing";
-    
     // Validation first
     if (!state.scheduled_date || !state.time_slot || !state.address || state.material.length === 0 || !state.weight) {
-      alert("Please fill in all required fields");
       setSubmited(false);
       return;
     }
@@ -156,40 +113,33 @@ const PickupPage = () => {
 
     // Create pickup data
     try {
-      const pickupData = {
-        user_id: actualUserId,
-        center_id: state.center_id,
-        address: state.address,
-        material: state.material,
-        weight: parseInt(state.weight),
-        instructions: state.instructions,
-        scheduled_date: state.scheduled_date,
-        time_slot: state.time_slot
-      };
+const pickupData = {
+  address: state.address,
+  items: state.material, 
+  weight: parseInt(state.weight),
+  instructions: state.instructions,
+  pickupTime: new Date(state.scheduled_date), 
+  time_slot: state.time_slot,
+};
       
-      console.log("Sending pickup data:", pickupData);
-      console.log("Form state:", state);
-      
+   let res;
+   if(editingPickupId){
+    res = await api.put(`/pickups/${editingPickupId}`, pickupData);
+    console.log("Pickup updated successfully:", res.data);
+    setEditingPickupId(null);
+   }
       const response = await api.post("/pickups", pickupData);
       
       console.log("Pickup scheduled successfully:", response.data);
-      alert("Pickup scheduled successfully!");
-      
-      // Refresh pickup history if user is authenticated
-      if (isLoggedin && userData?._id) {
-        fetchUserPickups();
-      } else {
-        fetchAllPickups();
-      }
-      
-      // Reset form
-      dispatch({type: "RESET_FORM"});
-      
+     setSuccess(true)
+     setTimeout(() => setSuccess(false), 3000); // Hide success message after 3 seconds
+      fetchMyPickups(); // Refresh pickup history
+      dispatch({type: "RESET_FORM"}); //Rest form
     } catch (error) {
       console.error("Error scheduling pickup:", error);
       console.error("Error response:", error.response?.data);
       console.error("Error status:", error.response?.status);
-      alert(`Failed to schedule pickup: ${error.response?.data?.message || error.message}`);
+      setSuccess(false);
     } finally {
       setSubmited(false);
     }
@@ -197,16 +147,47 @@ const PickupPage = () => {
 
   // Load centers and pickup history when component mounts
   useEffect(() => {
-    fetchCenters();
-    if (isLoggedin && userData?._id && !loadingUser) {
-      fetchUserPickups();
+    if (isLoggedin && userData?.id && !loadingUser) {
+      fetchMyPickups()
     } else {
-      fetchAllPickups();
+setPickupHistory([]);
     }
-  }, [isLoggedin, userData?._id, loadingUser]);
+  }, [isLoggedin, userData?.id, loadingUser]);
+
+
+  //Function to delete a pickup from history after deletion
+const handleDeletePickup = (pickupId) => {
+  console.log("🗑️ Removing pickup from list:", pickupId);
+  setPickupHistory(prev => prev.filter(p => p._id !== pickupId));
+  setSuccess(true);
+  setTimeout(() => setSuccess(false), 3000);
+};
+
+  //Function to edite a pickup - populate form with existing data
+const handleUpdatePickup = (pickupData) => {
+  console.log("Updating pickup:", pickupData);
+  // Populate form with existing data
+  dispatch({ type: "SET_ADDRESS", payload: pickupData.address });
+  dispatch({ type: "SET_WEIGHT", payload: pickupData.weight });
+  dispatch({ type: "SET_TIME", payload: pickupData.time_slot });
+  dispatch({ type: "SET_DATE", payload: new Date(pickupData.pickupTime).toISOString().split('T')[0] });
+  
+  // Set materials
+  if (Array.isArray(pickupData.items)) {
+    pickupData.items.forEach(item => {
+      const material = (item.category || item).toLowerCase();
+      dispatch({ type: "SET_MATERIAL", payload: material });
+    });
+  }
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setEditingPickupId(pickupData.id);
+};
+
+
 
   return (
-    <section id="pickup" className="mb-10 min-h-screen bg-gray-100">
+    <section id="pickup" className="mb-10 min-h-screen bg-gray-100 ">
       <div className="flex flex-col gap-2 px-10 mt-10 md:flex-row">
         <div className="bg-white border-none rounded-2xl text-gray-500 p-4">
           <div className="flex items-center">
@@ -250,6 +231,7 @@ const PickupPage = () => {
             </div>
           )}
 
+{/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5 mt-4 shadow-xl px-5 rounded-[20px] py-5 w-full">
             {/* Date + Time */}
             <div className="flex gap-5 flex-col md:flex-row">
@@ -261,7 +243,7 @@ const PickupPage = () => {
                   type="date"
                   id="date"
                   required
-                  value={state.scheduled_date || ""}
+                  value={state.scheduled_date || " "}
                   onChange={(e) => dispatch({type: "SET_DATE", payload: e.target.value})}
                   className="border-none rounded-xl p-2 bg-gray-100 text-gray-500 focus:outline-none focus:border focus:border-2 focus:border-solid focus:border-black transtion duration-100"
                 />
@@ -289,25 +271,7 @@ const PickupPage = () => {
               </div>
             </div>
 
-            {/* Center Selection */}
-            <div className="flex flex-col items-start gap-2">
-              <label htmlFor="center" className="text-black">
-                Recycling Center (Optional)
-              </label>
-              <select
-                id="center"
-                value={state.center_id || ""}
-                onChange={(e) => dispatch({type: "SET_CENTER_ID", payload: e.target.value})}
-                className="border-none rounded-xl p-2 bg-gray-100 text-gray-500 focus:outline-none focus:border focus:border-2 focus:border-solid focus:border-black transtion duration-100 w-[95%]"
-              >
-                <option value="">Select a center (optional)</option>
-                {centers.map((center) => (
-                  <option key={center._id} value={center._id}>
-                    {center.name} - {center.location}
-                  </option>
-                ))}
-              </select>
-            </div>
+
 
             {/* Address */}
             <div className="flex flex-col items-start gap-2">
@@ -441,9 +405,14 @@ const PickupPage = () => {
               }`}
             >
               <Truck className="mr-1" /> 
-              {submited ? 'Scheduling...' : 'Schedule Pickup'}
+              {submited ? (editingPickupId? 'Updating...' :'Scheduling...' ): (editingPickupId? 'Update' :'Schedule Pickup') }
             </button>
           </form>
+        {success && (
+          <div className="mt-4 p-4 bg-[rgba(0,0,0,0.2)]  border border-green-200 rounded-lg text-green-800">
+            Pickup scheduled successfully! wait for confirmation.
+          </div>
+        )}
         </div>
 
         {/* Pickup History */}
@@ -479,30 +448,31 @@ const PickupPage = () => {
                 </div>
               ) : loading ? (
                 <div className="text-center py-4">
-                  <p className="text-gray-500">Loading pickup history...</p>
+                  <LoadingSpinner />
                 </div>
               ) : pickupHistory.length > 0 ? (
                 <>
-                  <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p className="text-sm text-green-700">
-                      <span className="font-medium">Welcome, {userData?.name}!</span> You have {pickupHistory.length} pickup request{pickupHistory.length !== 1 ? 's' : ''}.
-                    </p>
-                  </div>
-                  {pickupHistory.map((pickup) => (
-                    <ReqHistoryCard
-                      key={pickup._id}
-                      date={new Date(pickup.created_at).toLocaleDateString("en-EG", {
-                        timeZone: "Africa/Cairo",
-                      })}
-                      material={pickup.material.join(", ")}
-                      time={pickup.time_slot}
-                      status={pickup.pickup_status}
-                      address={pickup.address}
-                      weight={pickup.weight}
-                      scheduledDate={new Date(pickup.scheduled_date).toLocaleDateString()}
-                      requestId={pickup.request_id}
-                    />
-                  ))}
+                 
+                 {pickupHistory.map((pickup) => (
+  <ReqHistoryCard
+    key={pickup._id}
+    date={new Date(pickup.createdAt).toLocaleDateString("en-EG", {
+      timeZone: "Africa/Cairo",
+    })}
+    material={Array.isArray(pickup.items) 
+      ? pickup.items.map(item => item.category || item).join(", ")
+      : pickup.items}
+    items={pickup.items}
+    time={pickup.time_slot}
+    status={pickup.status}
+    address={pickup.address}
+    weight={pickup.weight}
+    scheduledDate={new Date(pickup.pickupTime).toLocaleDateString()}
+    requestId={pickup._id}
+    onDelete={handleDeletePickup}
+    onUpdate={handleUpdatePickup}
+  />
+))}
                 </>
               ) : (
                 <div className="text-center py-8">
@@ -520,7 +490,7 @@ const PickupPage = () => {
             {isLoggedin && pickupHistory.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <button
-                  onClick={fetchUserPickups}
+                  onClick={fetchMyPickups}
                   className="text-green-700 hover:text-green-800 text-sm font-medium transition-colors"
                 >
                   Refresh History

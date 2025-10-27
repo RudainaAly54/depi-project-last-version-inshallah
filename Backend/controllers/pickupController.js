@@ -1,8 +1,9 @@
+// controllers/pickupController.js
 import Pickup from "../models/Pickup.js";
 
 /**
  * GET /api/pickups
- * Fetch all pickups (populated with user & center)
+ * Fetch all pickups (Admin only)
  */
 export const getAllPickups = async (req, res) => {
   try {
@@ -19,17 +20,50 @@ export const getAllPickups = async (req, res) => {
 };
 
 /**
+ * POST /api/pickups
+ * Create a new pickup
+ */
+export const createPickup = async (req, res) => {
+  try {
+    const { items, address, pickupTime, time_slot, weight, instructions } = req.body;
+
+    // ✅ validation
+    if (!address || !items || !weight || !pickupTime || !time_slot) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    const pickup = await Pickup.create({
+      userId: req.userId, // من الـ token
+      address,
+      items,
+      weight,
+      instructions,
+      pickupTime: new Date(pickupTime),
+      time_slot,
+    });
+
+    res.status(201).json({ success: true, pickup });
+  } catch (error) {
+    console.error("Error creating pickup:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
  * PUT /api/pickups/:id
- * Update pickup (status or schedule)
+ * Update pickup (status or reschedule)
  */
 export const updatePickup = async (req, res) => {
   try {
     const { id } = req.params;
-    const { pickup_status, scheduled_date } = req.body;
+    const { status, pickupTime } = req.body;
 
     const updated = await Pickup.findByIdAndUpdate(
       id,
-      { pickup_status, scheduled_date },
+      { status, pickupTime },
       { new: true }
     )
       .populate("userId", "name email")

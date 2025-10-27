@@ -11,6 +11,7 @@ import postsRouter from "./routes/postsRoutes.js";
 import usersRouter from "./routes/userRoutes.js";
 import pickupRoutes from "./routes/pickupRoutes.js";
 import deliveryAgentRoutes from "./routes/deliveryAgentRoutes.js";
+import centersRoutes from "./routes/centersRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -51,6 +52,7 @@ app.use("/api/posts", postsRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/pickups", pickupRoutes);
 app.use("/api/delivery-agents", deliveryAgentRoutes);
+app.use("/api/centers", centersRoutes);
 
 // Default route
 app.get("/", (req, res) => {

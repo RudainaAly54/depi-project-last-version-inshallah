@@ -11,9 +11,19 @@ const PickupAndDropoff = () => {
         window.location.href = `#${newPage}`;
     }
 return(
-    <div className="bg-gray-100 min-h-full pb-10">
-        <NavBar/>
-       <div className="relative w-[90%] h-10 bg-gray-200 rounded-full mx-auto mt-10 flex justify-between items-center p-1 overflow-hidden">
+  <>
+    <NavBar/>
+    <section className="bg-gray-100 min-h-full pb-10">
+      
+      {/* Header */}
+      <div className="mx-10">
+        <h1 className="text-3xl font-bold  text-gray-900 py-6">
+          Pickup & Drop-off
+        </h1>
+        <p className="text-gray-600">
+          Find nearby recycling centers or schedule convenient pickup services for your recyclable materials.</p>
+      </div>
+       <div className="relative w-[90%] h-10 bg-gray-200 rounded-full mx-auto mt-10 flex justify-evenly items-center p-1 overflow-hidden">
 
       {/* Sliding background */}
       <div
@@ -45,9 +55,9 @@ return(
       </button>
     </div>
         {activePage === 'pickup' ? <PickupPage/> : <CentersPage/>}
-        
-        <Footer/>
-    </div>
+    </section>
+     <Footer/>
+    </>
 )
 }
 

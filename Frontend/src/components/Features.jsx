@@ -1,6 +1,14 @@
 import React from 'react'
 import Cards from './Cards'
 import { assets } from '../assets/assets'
+<<<<<<< HEAD
+=======
+import { GiTakeMyMoney} from "react-icons/gi";
+import { MdRecycling } from "react-icons/md";
+import { GiSmart } from "react-icons/gi";
+import { IoFootsteps } from "react-icons/io5";
+
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 
 const Features = () => {
   return (
@@ -11,6 +19,7 @@ const Features = () => {
         </div>
         <div className='place-self-center-safe flex flex-col justify-center items-center max-w-100 sm:gap-4 md:max-w-full md:flex-row md:justify-around'>
         <Cards
+<<<<<<< HEAD
         title={'♻️ Easy Recycling'}
         description={'Drop off your items at a nearby station or schedule a doorstep pickup — recycling has never been this simple.'}
         image={assets.Feature1}/>
@@ -24,6 +33,33 @@ const Features = () => {
         image={assets.Feature3}/>
         <Cards
         title={'🤖 AI Scanner'}
+=======
+        title={ <div className="flex items-center gap-2">
+          < MdRecycling className="text-green-600 text-2xl" />
+          <span>Easy Recycling</span>
+        </div>}
+        description={'Drop off your items at a nearby station or schedule a doorstep pickup — recycling has never been this simple.'}
+        image={assets.Feature1}/>
+        <Cards
+        title={ <div className="flex items-center gap-2">
+          <GiTakeMyMoney className="text-green-600 text-2xl" />
+          <span>Earn Rewards</span>
+        </div>}
+        description={'Every item you recycle earns you points that can be redeemed for cash, discounts, or eco-friendly products.'}
+        image={assets.Feature2}/>
+        <Cards
+        title={<div className="flex pt-4 items-center gap-2">
+          <IoFootsteps className="text-green-600 text-2xl" />
+          <span>Smart Tracking</span>
+        </div>}
+        description={'Track your recycling history, monitor your impact, and celebrate every step you take toward a cleaner planet with our easy-to-use app.'}
+        image={assets.Feature3}/>
+        <Cards
+        title={<div className="flex items-center gap-2">
+          <GiSmart className="text-green-600 text-2xl" />
+          <span>AI Scanner</span>
+        </div>}
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
         description={'Use our smart AI-powered scanner to instantly detect whether an item is recyclable and which category it belongs to.'}
         image={assets.Feature4}/>
         </div>

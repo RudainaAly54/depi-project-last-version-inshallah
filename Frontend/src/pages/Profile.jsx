@@ -5,6 +5,10 @@ import ProfileSummary from "../components/ProfileSummary";
 import ProfileTabs from "../components/ProfileTab";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
+<<<<<<< HEAD
+=======
+import LoadingSpinner from "../components/LoadingSpinner";
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -16,7 +20,11 @@ const Profile = () => {
         const res = await axios.get("http://localhost:5000/api/auth/profile", {
           withCredentials: true,
         });
+<<<<<<< HEAD
         setUser(res.data.userData || res.data.user); // حسب الـ backend
+=======
+        setUser(res.data.userData || res.data.user); 
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
       } catch (err) {
         console.error("Error fetching profile:", err);
       } finally {
@@ -26,8 +34,19 @@ const Profile = () => {
     fetchProfile();
   }, []);
 
+<<<<<<< HEAD
   if (loading)
     return <p className="text-center text-gray-500 py-6">Loading profile...</p>;
+=======
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -55,7 +74,11 @@ const Profile = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Profile;
 
 
 
+=======
+export default Profile;
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0

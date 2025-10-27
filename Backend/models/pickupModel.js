@@ -24,6 +24,7 @@ const pickupSchema = new mongoose.Schema(
     pickupTime: {
       type: Date,
     },
+<<<<<<< HEAD
     items: 
       {
       type: [String],
@@ -45,6 +46,14 @@ const pickupSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+=======
+    items: [
+      {
+        name: String,
+        quantity: Number,
+      },
+    ],
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
   },
   { timestamps: true }
 );

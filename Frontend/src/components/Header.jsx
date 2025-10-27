@@ -1,9 +1,16 @@
 import React, { useContext } from "react";
 import { assets } from "../assets/assets";
 import { AppContent } from "../context/AppContext";
+<<<<<<< HEAD
 
 const Header = () => {
   const { userData } = useContext(AppContent);
+=======
+import { useNavigate } from 'react-router-dom';
+const Header = () => {
+  const { userData } = useContext(AppContent);
+  const navigate=useNavigate();
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
   return (
 <header className="flex flex-col-reverse sm:flex-row md:flex-row lg:flex-row px-3 justify-center items-center max-w-7xl mx-auto">
   <div className="self-center px-5 flex-1 min-w-0">
@@ -24,9 +31,20 @@ const Header = () => {
       Every small step matters. Together, we can reduce waste, save energy,
       and build a cleaner planet.
     </p>
+<<<<<<< HEAD
     <button className="bg-[#186933] hover:bg-[#124d26] transition-colors text-white  font-medium p-2 sm:p-3 m-2 sm:m-3 w-37 rounded-xl cursor-pointer">
       Start Recycling
     </button>
+=======
+    {userData?(<button onClick={()=>navigate('/recycle-scanner')} className="bg-[#186933] hover:bg-[#124d26] transition-colors text-white  font-medium p-2 sm:p-3 m-2 sm:m-3 w-37 rounded-xl cursor-pointer">
+      Start Recycling
+    </button>):(
+      <button onClick={()=>navigate('/login')} className="bg-[#186933] hover:bg-[#124d26] transition-colors text-white  font-medium p-2 sm:p-3 m-2 sm:m-3 w-37 rounded-xl cursor-pointer">
+      Start Recycling
+    </button>
+    )}
+    
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
   </div>
   <div className="flex-shrink-0 w-70 sm:w-70 md:w-100 lg:w-140">
     <img 

@@ -3,6 +3,10 @@ import Pickup from "../models/pickupModel.js";
 import userModel from "../models/userModel.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import roleAuth from "../middleware/roleAuth.js";
+<<<<<<< HEAD
+=======
+import Center from "../models/centerModel.js";
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 
 const router = express.Router();
 
@@ -23,6 +27,7 @@ router.get("/", authMiddleware, roleAuth("admin"), async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 //Get pickups for a specific user(admin or same user)
 router.get("/user/:userId", authMiddleware, async (req, res) => {
   try {
@@ -70,6 +75,31 @@ router.post("/", authMiddleware, async (req, res) => {
     res.status(201).json({ success: true, pickup });
   } catch (error) {
     console.error("Error creating pickup:", error);
+=======
+
+// ♻️ Create a new pickup (user only)
+router.post("/", authMiddleware, async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Items required" });
+    }
+
+    const user = await userModel.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const pickup = await Pickup.create({
+      userId: user._id,
+      userName: user.name,
+      items,
+      status: "pending",
+    });
+
+    res.json({ success: true, pickup });
+  } catch (error) {
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -77,6 +107,7 @@ router.post("/", authMiddleware, async (req, res) => {
 // 👤 Get current user's pickups (user)
 router.get("/my", authMiddleware, async (req, res) => {
   try {
+<<<<<<< HEAD
     console.log("🔍 GET /my called");
     console.log("User ID:", req.userId);
     console.log("User Role:", req.userRole);
@@ -172,6 +203,11 @@ router.put("/:id", authMiddleware, async (req, res) => {
     res.json({ success: true, pickup, message: "Pickup updated successfully" });
   } catch (error) {
     console.error("❌ Error updating pickup:", error);
+=======
+    const pickups = await Pickup.find({ userId: req.userId }).sort({ createdAt: -1 });
+    res.json({ success: true, pickups });
+  } catch (error) {
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
     res.status(500).json({ success: false, message: error.message });
   }
 });
@@ -223,8 +259,13 @@ router.put("/:id/complete", authMiddleware, async (req, res) => {
       "E-Waste": 20,
     };
     const totalPoints = pickup.items.reduce((acc, item) => {
+<<<<<<< HEAD
       const perKg = POINTS_PER_KG[items] || 0;
       return acc + perKg * (weight || 0);
+=======
+      const perKg = POINTS_PER_KG[item.category] || 0;
+      return acc + perKg * (item.weight || 0);
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
     }, 0);
 
     pickup.status = "completed";
@@ -234,12 +275,15 @@ router.put("/:id/complete", authMiddleware, async (req, res) => {
     // Update user points
     await userModel.findByIdAndUpdate(pickup.userId, {
       $inc: { points: totalPoints },
+<<<<<<< HEAD
       $push: {
         activity: {
           action: `Completed pickup worth${totalPoints} points`,
           points: totalPoints,
         },
       },
+=======
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
     });
 
     res.json({ success: true, pickup, awardedPoints: totalPoints });
@@ -248,6 +292,9 @@ router.put("/:id/complete", authMiddleware, async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 export default router;

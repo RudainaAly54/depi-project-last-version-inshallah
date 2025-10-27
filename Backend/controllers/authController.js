@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
@@ -410,6 +411,8 @@ import {
       .json({ success: false, message: "Failed to update profile" });
   }
 };*/
+=======
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";

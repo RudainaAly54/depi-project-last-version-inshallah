@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const centerSchema = new mongoose.Schema(
   {
+<<<<<<< HEAD
     name: {
       type: String,
       required: true,
@@ -69,3 +70,13 @@ const centerSchema = new mongoose.Schema(
 const Center = mongoose.model("Center", centerSchema);
 
 export default Center;
+=======
+    name: { type: String, required: true },
+    location: { type: String, default: "" },
+    phone: { type: String, default: "" },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Center", centerSchema);
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0

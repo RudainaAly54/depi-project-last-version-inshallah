@@ -254,22 +254,22 @@ const fetchAgents = async () => {
               Assign To (Delivery Agent):
             </label>
             <select
-  className="w-full border rounded-md p-2 mb-4"
-  value={activePickup.deliveryAgentId || ""}
-  onChange={(e) =>
-    setActivePickup({
-      ...activePickup,
-      deliveryAgentId: e.target.value,
-    })
-  }
->
-  <option value="">-- Select Agent --</option>
-  {agents.map((a) => (
-    <option key={a._id} value={a._id}>
-      {a.name} ({a.email})
-    </option>
-  ))}
-</select>
+              className="w-full border rounded-md p-2 mb-4"
+              value={activePickup.deliveryAgentId || ""}
+              onChange={(e) =>
+                setActivePickup({
+                  ...activePickup,
+                  deliveryAgentId: e.target.value,
+                })
+              }
+            >
+              <option value="">-- Select Agent --</option>
+              {agents.map((a) => (
+                <option key={a._id} value={a._id}>
+                  {a.name} ({a.email})
+                </option>
+              ))}
+            </select>
 
             {/* Select Pickup Date & Time */}
             <label className="block text-sm text-gray-600 mb-2">

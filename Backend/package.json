@@ -17,8 +17,12 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+<<<<<<< HEAD
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.2",
+=======
+    "mongoose": "^8.18.1",
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6"
   },

@@ -3,12 +3,21 @@ import { assets } from '../assets/assets'
 import Testmonial from './Testmonial'
 const Testmonials = () => {
   return (
+<<<<<<< HEAD
     <section className='bg-cover bg-center h-svh w-full'  style={{ backgroundImage: `url(${assets.bgtest})` }}>
         <div className='text-center flex flex-col items-center m-8'>
             <h2 className='capitalize text-2xl md:text-3xl font-extrabold tracking-wide'>Testimonials</h2>
             <div className='w-40 md:w-22  h-1 my-2 bg-[#186933]'></div>
         </div>
         <div className='flex justify-around gap-5  p-2 overflow-scroll no-scrollbar'>
+=======
+    <section className='bg-cover bg-center w-full'  style={{ backgroundImage: `url(${assets.bgtest})` }}>
+        <div className='text-center flex flex-col items-center mt-8'>
+            <h2 className='capitalize text-2xl md:text-3xl font-extrabold tracking-wide'>Testimonials</h2>
+            <div className='w-40 md:w-22  h-1 my-2 bg-[#186933]'></div>
+        </div>
+        <div className='flex justify-around gap-5  p-6 overflow-scroll no-scrollbar'>
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
         <Testmonial
         title={'Recycling made simple!'}
         description={'"I used to throw away so many bottles and cans, but now I just drop them at the recycling point and even earn rewards. It feels great to know I’m making a difference and saving money at the same time."'}

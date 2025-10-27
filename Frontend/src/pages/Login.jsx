@@ -46,6 +46,7 @@ const Login = () => {
         toast.success(state === "Sign Up" ? "Account created successfully" : "Welcome back");
         setIsLoggedin(true);
 
+<<<<<<< HEAD
         // ✅ fetch user details (with role)
         const user = await getUserData();
         console.log("User data after login:", user); // Debug log
@@ -56,6 +57,18 @@ const Login = () => {
           navigate("/admin");
         } else {
           console.log("Redirecting user to /"); // Debug log
+=======
+        // fetch user details (with role)
+        const user = await getUserData();
+        console.log("User data after login:", user); 
+
+        // redirect based on role
+        if (user?.role === "admin") {
+          console.log("Redirecting admin to /admin"); 
+          navigate("/admin");
+        } else {
+          console.log("Redirecting user to /"); 
+>>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
           navigate("/");
         }
       } else {

@@ -105,9 +105,6 @@ useEffect(() => {
                   </svg>
                 </div>
                 <p className="text-gray-500 font-medium">No centers found</p>
-                <p className="text-sm text-gray-400 mt-2">
-                  Try changing your filter or check back later
-                </p>
               </div>
             )}
           </div>

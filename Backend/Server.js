@@ -11,10 +11,7 @@ import postsRouter from "./routes/postsRoutes.js";
 import usersRouter from "./routes/userRoutes.js";
 import pickupRoutes from "./routes/pickupRoutes.js";
 import deliveryAgentRoutes from "./routes/deliveryAgentRoutes.js";
-<<<<<<< HEAD
 import centersRoutes from "./routes/centersRoutes.js";
-=======
->>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 
 dotenv.config();
 const app = express();
@@ -55,10 +52,7 @@ app.use("/api/posts", postsRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/pickups", pickupRoutes);
 app.use("/api/delivery-agents", deliveryAgentRoutes);
-<<<<<<< HEAD
 app.use("/api/centers", centersRoutes);
-=======
->>>>>>> 01c123bc57e31401aa3b9e5d1f67dee9e1186cb0
 
 // Default route
 app.get("/", (req, res) => {
